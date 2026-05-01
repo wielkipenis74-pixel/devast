@@ -1,62 +1,74 @@
-// == Devast.io Neon Menu UI FULL ==
+// == Devast.io Neon Menu UI FULL FIXED ==
 
 (function () {
 
 const style = document.createElement("style");
 
 style.innerHTML = `
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
 
 #devastMenu{
 position:fixed;
 top:120px;
 left:120px;
-width:300px;
-background:rgba(0,0,0,.94);
+width:340px;
+background:rgba(0,0,0,.96);
 border:2px solid #8a2cff;
-border-radius:14px;
+border-radius:16px;
 font-family:Orbitron;
-color:#caa6ff;
-box-shadow:0 0 25px #8a2cff;
+font-size:15px;
+color:#d7b8ff;
+box-shadow:0 0 30px #8a2cff;
 z-index:999999;
 }
 
 #devastHeader{
 text-align:center;
-font-size:22px;
-padding:14px;
+font-size:24px;
+padding:16px;
 border-bottom:1px solid #8a2cff;
-text-shadow:0 0 12px #8a2cff;
+text-shadow:0 0 14px #8a2cff;
 }
 
 .menuItem{
-padding:12px 16px;
+padding:14px 18px;
 border-bottom:1px solid rgba(138,44,255,.25);
 cursor:pointer;
+font-size:16px;
 }
 
 .subMenu{
 display:none;
-padding:10px 20px;
+padding:12px 22px;
 background:rgba(138,44,255,.08);
 }
 
 .subMenu label{
 display:flex;
 justify-content:space-between;
-margin:6px 0;
-font-size:13px;
+margin:8px 0;
+font-size:14px;
 }
 
-input[type=checkbox],
 input[type=range]{
+width:140px;
 accent-color:#8a2cff;
+}
+
+input[type=text]{
+background:black;
+border:1px solid #8a2cff;
+color:white;
+width:120px;
 }
 
 select{
 background:black;
-color:white;
 border:1px solid #8a2cff;
+color:white;
+appearance:none;
+padding:4px 8px;
+border-radius:6px;
 }
 
 .arrow{
@@ -68,17 +80,21 @@ color:#a56cff;
 document.head.appendChild(style);
 
 
-
-
 /*
 CONFIG
 */
 
 const MOD = {
 
-AutoFire:false,
-MouseFov:3000,
+VisualizeResolving:false,
+VisualizeResolvingColor:"#eeeeee",
 ResolverType:"linear",
+DistanceCoefficient:270,
+BulletSpeedCoefficient:1.75,
+OffsetCoefficient:0.1,
+MouseFov:3000,
+AutoFire:false,
+LockId:-1,
 
 JitterActive:false,
 JitterOffset:50,
@@ -91,17 +107,6 @@ linesOpacity:1,
 
 TeamColor:"#00ffff",
 EnemyColor:"#ff0000",
-VisualizeResolving:false,
-VisualizeResolvingColor:"#eeeeee",
-DistanceCoefficient:270,
-BulletSpeedCoefficient:1.75,
-OffsetCoefficient:0.1,
-MouseFov:3000,
-AutoFire:false,
-LockId:-1,
-ResolverType:"linear",
-
-/* BINDS */
 
 AimbotKey:"KeyZ",
 AutoLootKey:"NoKey",
@@ -110,8 +115,6 @@ AutoBuildKey:"KeyB",
 AutoRunKey:"KeyShift",
 JitterActiveKey:"KeyJ",
 PlayerListKey:"KeyL",
-
-/* AUTOMATION */
 
 AutoCookFood:false,
 AutoAlloys:false,
@@ -136,7 +139,6 @@ Token:""
 };
 
 
-
 /*
 UI FACTORIES
 */
@@ -158,14 +160,15 @@ return wrap;
 }
 
 
-
 function slider(name,min,max){
 
 const wrap=document.createElement("label");
 
+const step = Number.isInteger(MOD[name]) ? 1 : 0.1;
+
 wrap.innerHTML=`
 ${name}
-<input type="range" min="${min}" max="${max}" step="0.1">
+<input type="range" min="${min}" max="${max}" step="${step}">
 `;
 
 const input=wrap.querySelector("input");
@@ -177,7 +180,6 @@ input.oninput=e=>MOD[name]=parseFloat(e.target.value);
 return wrap;
 
 }
-
 
 
 function dropdown(name,list){
@@ -207,7 +209,6 @@ return wrap;
 }
 
 
-
 function color(name,value){
 
 const wrap=document.createElement("label");
@@ -225,7 +226,6 @@ wrap.append(name,input);
 return wrap;
 
 }
-
 
 
 function textKey(name){
@@ -247,7 +247,6 @@ return wrap;
 }
 
 
-
 function textInput(name){
 
 const wrap=document.createElement("label");
@@ -267,7 +266,6 @@ return wrap;
 }
 
 
-
 function button(label){
 
 const btn=document.createElement("button");
@@ -275,11 +273,8 @@ const btn=document.createElement("button");
 btn.textContent=label;
 
 btn.style.margin="6px 0";
-
 btn.style.background="#120022";
-
 btn.style.color="#cfa6ff";
-
 btn.style.border="1px solid #8a2cff";
 
 btn.onclick=()=>{
@@ -287,7 +282,6 @@ btn.onclick=()=>{
 if(label==="Save Settings"){
 
 localStorage.setItem("CHOZA_CONFIG",JSON.stringify(MOD));
-
 alert("Config saved");
 
 }
@@ -301,7 +295,6 @@ navigator.clipboard.writeText(localStorage.getItem("token"));
 if(label==="Change Token"){
 
 localStorage.setItem("token",MOD.Token);
-
 location.reload();
 
 }
@@ -313,8 +306,6 @@ return btn;
 }
 
 
-
-
 /*
 MENU STRUCTURE
 */
@@ -324,44 +315,43 @@ const modules={
 AIMBOT:[
 
 checkbox("VisualizeResolving"),
-
 color("VisualizeResolvingColor","#eeeeee"),
-
 dropdown("ResolverType",["linear","predict","advanced"]),
-
 slider("DistanceCoefficient",0,500),
-
 slider("BulletSpeedCoefficient",0,5),
-
 slider("OffsetCoefficient",0,1),
-
 slider("MouseFov",0,5000),
-
 checkbox("AutoFire"),
-
 slider("LockId",-10,10)
 
 ],
 
 ANTIAIM:[
+
 checkbox("JitterActive"),
 slider("JitterOffset",0,200)
+
 ],
 
 VISUALS:[
+
 checkbox("ShowHP"),
 checkbox("ShowPing"),
 checkbox("PlayerTracers"),
 slider("Scale",-1,1),
 slider("linesOpacity",0,2)
+
 ],
 
 COLORS:[
+
 color("TeamColor","#00ffff"),
 color("EnemyColor","#ff0000")
+
 ],
 
 BINDS:[
+
 textKey("AimbotKey"),
 textKey("AutoLootKey"),
 textKey("FAutoLootKey"),
@@ -369,9 +359,11 @@ textKey("AutoBuildKey"),
 textKey("AutoRunKey"),
 textKey("JitterActiveKey"),
 textKey("PlayerListKey")
+
 ],
 
 AUTOMATION:[
+
 checkbox("AutoCookFood"),
 checkbox("AutoAlloys"),
 checkbox("AutoUranium"),
@@ -389,20 +381,24 @@ checkbox("FAutoLoot"),
 checkbox("AutoLoot"),
 checkbox("AutoFeed"),
 slider("HungryLevel",0,100)
+
 ],
 
 TOKENCHANGER:[
+
 button("Copy Token"),
 textInput("Token"),
 button("Change Token")
+
 ],
 
 CFG:[
+
 button("Save Settings")
+
 ]
 
 };
-
 
 
 /*
@@ -448,8 +444,6 @@ menu.appendChild(sub);
 
 
 document.body.appendChild(menu);
-
-
 
 
 /*
