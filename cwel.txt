@@ -1,3 +1,5 @@
+// == Devast.io Neon Menu UI FULL ==
+
 (function () {
 
 const style = document.createElement("style");
@@ -5,246 +7,129 @@ const style = document.createElement("style");
 style.innerHTML = `
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
 
-#devastMenu {
-
-position: fixed;
-top: 120px;
-left: 120px;
-width: 300px;
-
-background: rgba(0,0,0,0.94);
-
-border: 2px solid #8a2cff;
-
-border-radius: 14px;
-
-font-family: Orbitron;
-
-color: #caa6ff;
-
-box-shadow: 0 0 25px #8a2cff;
-
-z-index: 999999;
-
+#devastMenu{
+position:fixed;
+top:120px;
+left:120px;
+width:300px;
+background:rgba(0,0,0,.94);
+border:2px solid #8a2cff;
+border-radius:14px;
+font-family:Orbitron;
+color:#caa6ff;
+box-shadow:0 0 25px #8a2cff;
+z-index:999999;
 }
 
-
-#devastHeader {
-
-text-align: center;
-
-font-size: 22px;
-
-padding: 14px;
-
-border-bottom: 1px solid #8a2cff;
-
-text-shadow: 0 0 12px #8a2cff;
-
+#devastHeader{
+text-align:center;
+font-size:22px;
+padding:14px;
+border-bottom:1px solid #8a2cff;
+text-shadow:0 0 12px #8a2cff;
 }
 
-
-.menuItem {
-
-padding: 12px 16px;
-
-border-bottom: 1px solid rgba(138,44,255,0.25);
-
-cursor: pointer;
-
+.menuItem{
+padding:12px 16px;
+border-bottom:1px solid rgba(138,44,255,.25);
+cursor:pointer;
 }
 
-
-.subMenu {
-
-display: none;
-
-padding: 10px 20px;
-
-background: rgba(138,44,255,0.08);
-
+.subMenu{
+display:none;
+padding:10px 20px;
+background:rgba(138,44,255,.08);
 }
 
-
-.subMenu label {
-
-display: flex;
-
-justify-content: space-between;
-
-margin: 6px 0;
-
-font-size: 13px;
-
+.subMenu label{
+display:flex;
+justify-content:space-between;
+margin:6px 0;
+font-size:13px;
 }
 
-
-input[type="checkbox"] {
-
-accent-color: #8a2cff;
-
+input[type=checkbox],
+input[type=range]{
+accent-color:#8a2cff;
 }
 
-
-input[type="range"] {
-
-width: 120px;
-
-accent-color: #8a2cff;
-
+select{
+background:black;
+color:white;
+border:1px solid #8a2cff;
 }
 
-
-select {
-
-background: black;
-
-color: white;
-
-border: 1px solid #8a2cff;
-
-}
-
-.arrow {
-
-margin-right: 10px;
-
-color: #a56cff;
-
+.arrow{
+margin-right:10px;
+color:#a56cff;
 }
 `;
 
 document.head.appendChild(style);
 
 
+
+
 /*
-CONFIG OBJECT
+CONFIG
 */
 
 const MOD = {
 
 AutoFire:false,
-
-ShowHP:true,
-
-ShowPing:true,
-
-PlayerTracers:false,
-
 MouseFov:3000,
-
 ResolverType:"linear",
 
 JitterActive:false,
-
 JitterOffset:50,
 
+ShowHP:true,
+ShowPing:true,
+PlayerTracers:false,
 Scale:-0.53,
+linesOpacity:1,
 
-linesOpacity:1
+TeamColor:"#00ffff",
+EnemyColor:"#ff0000",
 
-};
+/* BINDS */
 
+AimbotKey:"KeyZ",
+AutoLootKey:"NoKey",
+FAutoLootKey:"KeyX",
+AutoBuildKey:"KeyB",
+AutoRunKey:"KeyShift",
+JitterActiveKey:"KeyJ",
+PlayerListKey:"KeyL",
 
-/*
-MENU STRUCTURE
-*/
+/* AUTOMATION */
 
-const modules = {
+AutoCookFood:false,
+AutoAlloys:false,
+AutoUranium:false,
+AutoGasoline:false,
+AutoInventory:false,
+AutoRun:false,
+AutoRespawn:false,
+AutoHit:false,
+AntiKick:true,
+AutoAcceptAndKick:false,
+AutoBuild:false,
+AutoWood:false,
+AutoSwitchEnable:false,
+FAutoLoot:false,
+AutoLoot:false,
+AutoFeed:false,
+HungryLevel:75,
 
-AIMBOT:[
-
-checkbox("AutoFire"),
-
-slider("MouseFov",0,5000),
-
-dropdown("ResolverType",["linear","predict","advanced"])
-
-],
-
-ANTIAIM:[
-
-checkbox("JitterActive"),
-
-slider("JitterOffset",0,200)
-
-],
-
-VISUALS:[
-
-checkbox("ShowHP"),
-
-checkbox("ShowPing"),
-
-checkbox("PlayerTracers"),
-
-slider("Scale",-1,1),
-
-slider("linesOpacity",0,2)
-
-],
-
-COLORS:[
-
-color("TeamColor","#00ffff"),
-
-color("EnemyColor","#ff0000")
-
-]
+Token:""
 
 };
 
 
-/*
-MENU BUILD
-*/
-
-const menu = document.createElement("div");
-
-menu.id="devastMenu";
-
-menu.innerHTML=`<div id="devastHeader">CHOZAHUINYA</div>`;
-
-
-Object.entries(modules).forEach(([section,items])=>{
-
-const item=document.createElement("div");
-
-item.className="menuItem";
-
-item.innerHTML=`<span class="arrow">▶</span>${section}`;
-
-const sub=document.createElement("div");
-
-sub.className="subMenu";
-
-
-items.forEach(el=>sub.appendChild(el));
-
-
-item.onclick=()=>{
-
-sub.style.display=sub.style.display==="block"?"none":"block";
-
-item.querySelector(".arrow").textContent=
-
-sub.style.display==="block"?"▼":"▶";
-
-};
-
-
-menu.appendChild(item);
-
-menu.appendChild(sub);
-
-});
-
-
-document.body.appendChild(menu);
-
 
 /*
-UI ELEMENT FACTORIES
+UI FACTORIES
 */
 
 function checkbox(name){
@@ -253,13 +138,16 @@ const wrap=document.createElement("label");
 
 wrap.innerHTML=`${name}<input type="checkbox">`;
 
-wrap.querySelector("input").checked=MOD[name];
+const input=wrap.querySelector("input");
 
-wrap.querySelector("input").onchange=e=>MOD[name]=e.target.checked;
+input.checked=MOD[name];
+
+input.onchange=e=>MOD[name]=e.target.checked;
 
 return wrap;
 
 }
+
 
 
 function slider(name,min,max){
@@ -280,6 +168,7 @@ input.oninput=e=>MOD[name]=parseFloat(e.target.value);
 return wrap;
 
 }
+
 
 
 function dropdown(name,list){
@@ -309,6 +198,7 @@ return wrap;
 }
 
 
+
 function color(name,value){
 
 const wrap=document.createElement("label");
@@ -326,6 +216,215 @@ wrap.append(name,input);
 return wrap;
 
 }
+
+
+
+function textKey(name){
+
+const wrap=document.createElement("label");
+
+const input=document.createElement("input");
+
+input.type="text";
+
+input.value=MOD[name];
+
+input.onchange=e=>MOD[name]=e.target.value;
+
+wrap.append(name,input);
+
+return wrap;
+
+}
+
+
+
+function textInput(name){
+
+const wrap=document.createElement("label");
+
+const input=document.createElement("input");
+
+input.type="text";
+
+input.value=MOD[name];
+
+input.onchange=e=>MOD[name]=e.target.value;
+
+wrap.append(name,input);
+
+return wrap;
+
+}
+
+
+
+function button(label){
+
+const btn=document.createElement("button");
+
+btn.textContent=label;
+
+btn.style.margin="6px 0";
+
+btn.style.background="#120022";
+
+btn.style.color="#cfa6ff";
+
+btn.style.border="1px solid #8a2cff";
+
+btn.onclick=()=>{
+
+if(label==="Save Settings"){
+
+localStorage.setItem("CHOZA_CONFIG",JSON.stringify(MOD));
+
+alert("Config saved");
+
+}
+
+if(label==="Copy Token"){
+
+navigator.clipboard.writeText(localStorage.getItem("token"));
+
+}
+
+if(label==="Change Token"){
+
+localStorage.setItem("token",MOD.Token);
+
+location.reload();
+
+}
+
+};
+
+return btn;
+
+}
+
+
+
+
+/*
+MENU STRUCTURE
+*/
+
+const modules={
+
+AIMBOT:[
+checkbox("AutoFire"),
+slider("MouseFov",0,5000),
+dropdown("ResolverType",["linear","predict","advanced"])
+],
+
+ANTIAIM:[
+checkbox("JitterActive"),
+slider("JitterOffset",0,200)
+],
+
+VISUALS:[
+checkbox("ShowHP"),
+checkbox("ShowPing"),
+checkbox("PlayerTracers"),
+slider("Scale",-1,1),
+slider("linesOpacity",0,2)
+],
+
+COLORS:[
+color("TeamColor","#00ffff"),
+color("EnemyColor","#ff0000")
+],
+
+BINDS:[
+textKey("AimbotKey"),
+textKey("AutoLootKey"),
+textKey("FAutoLootKey"),
+textKey("AutoBuildKey"),
+textKey("AutoRunKey"),
+textKey("JitterActiveKey"),
+textKey("PlayerListKey")
+],
+
+AUTOMATION:[
+checkbox("AutoCookFood"),
+checkbox("AutoAlloys"),
+checkbox("AutoUranium"),
+checkbox("AutoGasoline"),
+checkbox("AutoInventory"),
+checkbox("AutoRun"),
+checkbox("AutoRespawn"),
+checkbox("AutoHit"),
+checkbox("AntiKick"),
+checkbox("AutoAcceptAndKick"),
+checkbox("AutoBuild"),
+checkbox("AutoWood"),
+checkbox("AutoSwitchEnable"),
+checkbox("FAutoLoot"),
+checkbox("AutoLoot"),
+checkbox("AutoFeed"),
+slider("HungryLevel",0,100)
+],
+
+TOKENCHANGER:[
+button("Copy Token"),
+textInput("Token"),
+button("Change Token")
+],
+
+CFG:[
+button("Save Settings")
+]
+
+};
+
+
+
+/*
+MENU BUILD
+*/
+
+const menu=document.createElement("div");
+
+menu.id="devastMenu";
+
+menu.innerHTML=`<div id="devastHeader">CHOZAHUINYA</div>`;
+
+
+Object.entries(modules).forEach(([section,items])=>{
+
+const item=document.createElement("div");
+
+item.className="menuItem";
+
+item.innerHTML=`<span class="arrow">▶</span>${section}`;
+
+const sub=document.createElement("div");
+
+sub.className="subMenu";
+
+items.forEach(el=>sub.appendChild(el));
+
+item.onclick=()=>{
+
+sub.style.display=sub.style.display==="block"?"none":"block";
+
+item.querySelector(".arrow").textContent=
+
+sub.style.display==="block"?"▼":"▶";
+
+};
+
+menu.appendChild(item);
+
+menu.appendChild(sub);
+
+});
+
+
+document.body.appendChild(menu);
+
+
 
 
 /*
