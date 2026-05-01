@@ -91,6 +91,15 @@ linesOpacity:1,
 
 TeamColor:"#00ffff",
 EnemyColor:"#ff0000",
+VisualizeResolving:false,
+VisualizeResolvingColor:"#eeeeee",
+DistanceCoefficient:270,
+BulletSpeedCoefficient:1.75,
+OffsetCoefficient:0.1,
+MouseFov:3000,
+AutoFire:false,
+LockId:-1,
+ResolverType:"linear",
 
 /* BINDS */
 
@@ -313,9 +322,25 @@ MENU STRUCTURE
 const modules={
 
 AIMBOT:[
-checkbox("AutoFire"),
+
+checkbox("VisualizeResolving"),
+
+color("VisualizeResolvingColor","#eeeeee"),
+
+dropdown("ResolverType",["linear","predict","advanced"]),
+
+slider("DistanceCoefficient",0,500),
+
+slider("BulletSpeedCoefficient",0,5),
+
+slider("OffsetCoefficient",0,1),
+
 slider("MouseFov",0,5000),
-dropdown("ResolverType",["linear","predict","advanced"])
+
+checkbox("AutoFire"),
+
+slider("LockId",-10,10)
+
 ],
 
 ANTIAIM:[
