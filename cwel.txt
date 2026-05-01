@@ -4,7 +4,7 @@
 
 
 // ===============================
-// CONFIG CORE (HackCon)
+// CONFIG CORE
 // ===============================
 
 class HackCon {
@@ -30,14 +30,12 @@ this.AutoFire=false;
 
 this.weaponSlot=1;
 
-
 this.JitterActive=false;
 this.JitterOffset=50;
 
 this.StopJittersOnStop=false;
 
 this.AntiAimMode="At target";
-
 this.RoundSpeed=100;
 
 
@@ -89,13 +87,11 @@ this.AutoFeed=false;
 
 this.HungryLevel=75;
 
-
 this.Token="";
 
 }
 
 }
-
 
 window.MOD=new HackCon();
 
@@ -120,6 +116,23 @@ this.active=false;
 
 }
 
+update(x,y){
+
+this.prevX[2]=this.prevX[1];
+this.prevX[1]=this.prevX[0];
+this.prevX[0]=this.x;
+
+this.prevY[2]=this.prevY[1];
+this.prevY[1]=this.prevY[0];
+this.prevY[0]=this.y;
+
+this.x=x;
+this.y=y;
+
+this.active=true;
+
+}
+
 }
 
 
@@ -137,6 +150,11 @@ this.players[i]=new Resolve(i);
 
 this.mouseMapCords={x:0,y:0};
 
+this.lines=[{
+reset(){},
+color:"#eeeeee"
+}];
+
 }
 
 getPlayerById(id){
@@ -146,7 +164,6 @@ return this.players[id];
 }
 
 }
-
 
 window.GetAllTargets=new GetAllTargetsCon();
 
@@ -160,7 +177,6 @@ class AimbotCon {
 constructor(){
 
 this.lastAngle=0;
-
 this.targetPlayer=null;
 
 }
@@ -173,7 +189,6 @@ if(!target)return false;
 return(
 
 (target.x-target.prevX[0]>0)!=
-
 (target.prevX[0]-target.prevX[1]>0)
 
 );
@@ -183,11 +198,10 @@ return(
 
 resolve(){
 
-if(!World?.PLAYER)return 0;
-
+if(typeof World==="undefined") return 0;
+if(!World.PLAYER) return 0;
 
 const myPlayer=
-
 GetAllTargets.getPlayerById(World.PLAYER.id);
 
 
@@ -197,7 +211,6 @@ let target;
 if(MOD.LockId>-1){
 
 target=
-
 GetAllTargets.getPlayerById(MOD.LockId);
 
 }else{
@@ -205,19 +218,13 @@ GetAllTargets.getPlayerById(MOD.LockId);
 target=MOD.MouseFovEnable
 
 ?this.findNearestPlayerTo(
-
 GetAllTargets.mouseMapCords,
-
 MOD.MouseFov
-
 )
 
 :this.findNearestPlayerTo(
-
 myPlayer,
-
 2500
-
 );
 
 }
@@ -225,89 +232,61 @@ myPlayer,
 
 this.targetPlayer=target;
 
-
 if(!target)return 90;
 
 
 const weaponSlot=MOD.weaponSlot||1;
 
-
 const weaponId=
-
 World.PLAYER.inventory[weaponSlot-1][0];
 
 
 const weapon=
-
 ENTITIES[__ENTITIE_PLAYER__]
-
 .weapons[INVENTORY[weaponId].idWeapon];
 
 
 const vx=
-
 target.x-target.prevX[0];
 
 
 const vy=
-
 target.y-target.prevY[0];
 
 
 const bulletSpeed=
-
 weapon?.bulletSpeed
-
-?weapon.bulletSpeed*
-
-MOD.BulletSpeedCoefficient
-
+?weapon.bulletSpeed*MOD.BulletSpeedCoefficient
 :250;
 
 
 const distance=
-
 Math.hypot(
-
 myPlayer.x-target.x,
-
 myPlayer.y-target.y
-
-)
-
-*MOD.DistanceCoefficient;
+)*MOD.DistanceCoefficient;
 
 
 const travelTime=
-
 distance/bulletSpeed;
 
 
 const futureX=
-
 target.x+vx*travelTime;
 
 
 const futureY=
-
 target.y+vy*travelTime;
 
 
 const angle=
-
 Math.atan2(
-
 futureY-myPlayer.y,
-
 futureX-myPlayer.x
-
-)
-
-*(180/Math.PI);
+)*(180/Math.PI);
 
 
 this.lastAngle=angle;
-
 
 return Math.round(angle);
 
@@ -317,47 +296,38 @@ return Math.round(angle);
 findNearestPlayerTo(cords,fov){
 
 let best=null;
-
 let min=fov;
 
 
 for(let id=1;id<121;id++){
 
 let p=
-
 GetAllTargets.getPlayerById(id);
 
 if(!p.active)continue;
 
 
 let dist=
-
 Math.hypot(
-
 cords.x-p.x,
-
 cords.y-p.y
-
 );
 
 
 if(dist<min){
 
 best=p;
-
 min=dist;
 
 }
 
 }
 
-
 return best;
 
 }
 
 }
-
 
 window.Aimbot=new AimbotCon();
 
@@ -374,32 +344,31 @@ this.toggle=false;
 
 }
 
-
 getJitterAngle(){
 
 this.toggle=!this.toggle;
 
 return this.toggle
-
 ?Aimbot.resolve()+MOD.JitterOffset
-
 :Aimbot.resolve()-MOD.JitterOffset;
 
 }
 
 }
 
-
 window.Jitter=new JitterCon();
 
 
 // ===============================
-// AIM LOOP
+// AIM LOOP SAFE START
 // ===============================
 
 function AimbotRefresh(){
 
-if(!MOD.AimBotEnable)return;
+if(!MOD.AimBotEnable) return;
+
+if(typeof World==="undefined") return;
+if(!World.PLAYER) return;
 
 
 if(MOD.JitterActive){
@@ -412,15 +381,11 @@ SendWSmsg([6,Aimbot.resolve()]);
 
 
 if(
-
-MOD.AutoFire&&
-
+MOD.AutoFire &&
 Aimbot.wannaFire()
-
 ){
 
 SendWSmsg([4]);
-
 SendWSmsg([5]);
 
 }
@@ -440,19 +405,17 @@ setInterval(AimbotRefresh,40);
 window.addEventListener("keydown",e=>{
 
 if(e.code===MOD.AimbotKey)
-
 MOD.AimBotEnable=!MOD.AimBotEnable;
 
 
 if(e.code===MOD.JitterActiveKey)
-
 MOD.JitterActive=!MOD.JitterActive;
 
 });
 
 
 // ===============================
-// NEON MENU UI
+// SIMPLE NEON MENU (TEST PANEL)
 // ===============================
 
 (function(){
@@ -465,15 +428,20 @@ style.innerHTML=`
 position:fixed;
 top:120px;
 left:120px;
-width:340px;
-background:rgba(0,0,0,.96);
+width:260px;
+background:black;
 border:2px solid #8a2cff;
-border-radius:16px;
-font-family:Orbitron;
-font-size:15px;
+border-radius:14px;
 color:#d7b8ff;
-box-shadow:0 0 30px #8a2cff;
+padding:10px;
+font-family:Orbitron;
+box-shadow:0 0 25px #8a2cff;
 z-index:999999;
+}
+
+label{
+display:block;
+margin:8px 0;
 }
 
 `;
@@ -486,383 +454,29 @@ function checkbox(name){
 const label=document.createElement("label");
 
 label.innerHTML=
+name+' <input type="checkbox">';
 
-name+
-
-'<input type="checkbox">';
-
-
-const input=
-
-label.querySelector("input");
-
+const input=label.querySelector("input");
 
 input.checked=MOD[name];
 
-
-input.onchange=
-
-e=>MOD[name]=e.target.checked;
-
+input.onchange=e=>MOD[name]=e.target.checked;
 
 return label;
 
 }
 
 
-const menu=
-
-document.createElement("div");
-
+const menu=document.createElement("div");
 
 menu.id="devastMenu";
 
+menu.innerHTML="<b>CHOZAHUINYA</b>";
 
-menu.innerHTML=
-
-'<div style="padding:10px">CHOZAHUINYA</div>';
-
-
-menu.appendChild(
-
-checkbox("AimBotEnable")
-
-);
-
-
-menu.appendChild(
-
-checkbox("AutoFire")
-
-);
-
-
-menu.appendChild(
-
-checkbox("JitterActive")
-
-);
-
+menu.appendChild(checkbox("AimBotEnable"));
+menu.appendChild(checkbox("AutoFire"));
+menu.appendChild(checkbox("JitterActive"));
 
 document.body.appendChild(menu);
 
-
 })();
-// ========================
-// AIMBOT ENGINE CONNECTOR
-// ========================
-
-class AimbotCon {
-
-constructor(){
-
-this.lastAngle=0;
-
-this.targetPlayer=null;
-
-this.lastUpdateTime=Date.now();
-
-}
-
-wannaFire(target=this.targetPlayer){
-
-if(!target)return false;
-
-if(
-
-(target.x-target.prevX[0]>0)!=
-
-(target.prevX[0]-target.prevX[1]>0)
-
-||
-
-(target.y-target.prevY[0]>0)!=
-
-(target.prevY[0]-target.prevY[1]>0)
-
-)
-
-return true;
-
-return false;
-
-}
-
-
-resolve(){
-
-if(!World?.PLAYER)return 0;
-
-const deltaTime=(Date.now()-this.lastUpdateTime)/1000;
-
-this.lastUpdateTime=Date.now();
-
-const myPlayer=
-
-GetAllTargets.getPlayerById(World.PLAYER.id);
-
-
-let target;
-
-
-if(MOD.LockId>-1){
-
-target=
-
-GetAllTargets.getPlayerById(MOD.LockId);
-
-}else{
-
-target=MOD.MouseFovEnable
-
-?this.findNearestPlayerTo(
-
-GetAllTargets.mouseMapCords,
-
-MOD.MouseFov
-
-)
-
-:this.findNearestPlayerTo(
-
-myPlayer,
-
-2500
-
-);
-
-}
-
-
-this.targetPlayer=target;
-
-
-if(!target)return 90;
-
-
-let weaponSlot=
-
-MOD.weaponSlot||1;
-
-
-let weaponId=
-
-World.PLAYER.inventory[weaponSlot-1][0];
-
-
-let weapon=
-
-ENTITIES[__ENTITIE_PLAYER__]
-
-.weapons[INVENTORY[weaponId].idWeapon];
-
-
-const vx=
-
-target.x-target.prevX[0];
-
-
-const vy=
-
-target.y-target.prevY[0];
-
-
-const bulletSpeed=
-
-weapon?.bulletSpeed
-
-?weapon.bulletSpeed*
-
-MOD.BulletSpeedCoefficient
-
-:250;
-
-
-const distance=
-
-Math.hypot(
-
-myPlayer.x-target.x,
-
-myPlayer.y-target.y
-
-)
-
-*MOD.DistanceCoefficient;
-
-
-const travelTime=
-
-distance/bulletSpeed;
-
-
-const futureX=
-
-target.x+vx*travelTime;
-
-
-const futureY=
-
-target.y+vy*travelTime;
-
-
-const angle=
-
-Math.atan2(
-
-futureY-myPlayer.y,
-
-futureX-myPlayer.x
-
-)
-
-*(180/Math.PI);
-
-
-this.lastAngle=angle;
-
-
-if(MOD.VisualizeResolving){
-
-GetAllTargets.lines[0].color=
-
-MOD.VisualizeResolvingColor;
-
-GetAllTargets.lines[0].reset(
-
-myPlayer.x,
-
-myPlayer.y,
-
-futureX,
-
-futureY
-
-);
-
-}
-
-
-return Math.round(angle);
-
-}
-
-
-findNearestPlayerTo(cords,fov){
-
-let selected=null;
-
-let minDistance=fov;
-
-
-for(
-
-let id=1;
-
-id<GetAllTargets.players.length;
-
-id++
-
-){
-
-const player=
-
-GetAllTargets.getPlayerById(id);
-
-
-if(
-
-player.active
-
-&&player.id!==World.PLAYER.id
-
-&&(
-
-World.players[player.id].team
-
-!==World.PLAYER.team
-
-||
-
-World.PLAYER.team===-1
-
-)
-
-){
-
-const distance=
-
-Math.hypot(
-
-cords.x-player.x,
-
-cords.y-player.y
-
-);
-
-
-if(distance<minDistance){
-
-selected=player;
-
-minDistance=distance;
-
-}
-
-}
-
-}
-
-
-return selected;
-
-}
-
-}
-
-
-window.Aimbot=new AimbotCon();
-
-
-function AimbotRefresh(){
-
-if(!MOD.AimBotEnable)return;
-
-
-if(MOD.JitterActive){
-
-SendWSmsg([6,Jitter.getJitterAngle()]);
-
-}else{
-
-SendWSmsg([6,Aimbot.resolve()]);
-
-
-if(
-
-MOD.AutoFire
-
-&&
-
-Aimbot.wannaFire()
-
-){
-
-SendWSmsg([4]);
-
-SendWSmsg([5]);
-
-}
-
-}
-
-}
-
-
-setInterval(
-
-AimbotRefresh,
-
-40
-
-);
