@@ -1,11 +1,465 @@
-// == Devast.io Neon Menu UI FULL FIXED ==
+// ===============================
+// DEVAST.IO INTERNAL CORE + MENU
+// ===============================
 
-(function () {
 
-const style = document.createElement("style");
+// ===============================
+// CONFIG CORE (HackCon)
+// ===============================
 
-style.innerHTML = `
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+class HackCon {
+
+constructor(){
+
+this.AimBotEnable=false;
+
+this.VisualizeResolving=false;
+this.VisualizeResolvingColor="#eeeeee";
+
+this.ResolverType="linear";
+
+this.DistanceCoefficient=270;
+this.BulletSpeedCoefficient=1.75;
+this.OffsetCoefficient=0.1;
+
+this.MouseFovEnable=true;
+this.MouseFov=3000;
+
+this.LockId=-1;
+this.AutoFire=false;
+
+this.weaponSlot=1;
+
+
+this.JitterActive=false;
+this.JitterOffset=50;
+
+this.StopJittersOnStop=false;
+
+this.AntiAimMode="At target";
+
+this.RoundSpeed=100;
+
+
+// VISUALS
+
+this.ShowHP=true;
+this.ShowPing=true;
+this.PlayerTracers=false;
+
+this.linesOpacity=1;
+
+this.TeamColor="#00ffff";
+this.EnemyColor="#ff0000";
+
+
+// KEYBINDS
+
+this.AimbotKey="KeyZ";
+this.AutoLootKey="NoKey";
+this.FAutoLootKey="KeyX";
+this.AutoBuildKey="KeyB";
+this.AutoRunKey="KeyShift";
+this.JitterActiveKey="KeyJ";
+this.PlayerListKey="KeyL";
+
+
+// AUTOMATION
+
+this.AutoCookFood=false;
+this.AutoAlloys=false;
+this.AutoUranium=false;
+this.AutoGasoline=false;
+this.AutoInventory=false;
+
+this.AutoRun=false;
+this.AutoRespawn=false;
+this.AutoHit=false;
+
+this.AntiKick=true;
+
+this.AutoAcceptAndKick=false;
+this.AutoBuild=false;
+this.AutoWood=false;
+this.AutoSwitchEnable=false;
+
+this.FAutoLoot=false;
+this.AutoLoot=false;
+this.AutoFeed=false;
+
+this.HungryLevel=75;
+
+
+this.Token="";
+
+}
+
+}
+
+
+window.MOD=new HackCon();
+
+
+// ===============================
+// TARGET TRACKER
+// ===============================
+
+class Resolve {
+
+constructor(id){
+
+this.id=id;
+
+this.x=-1;
+this.y=-1;
+
+this.prevX=[-1,-1,-1];
+this.prevY=[-1,-1,-1];
+
+this.active=false;
+
+}
+
+}
+
+
+class GetAllTargetsCon {
+
+constructor(){
+
+this.players=[];
+
+for(let i=1;i<121;i++){
+
+this.players[i]=new Resolve(i);
+
+}
+
+this.mouseMapCords={x:0,y:0};
+
+}
+
+getPlayerById(id){
+
+return this.players[id];
+
+}
+
+}
+
+
+window.GetAllTargets=new GetAllTargetsCon();
+
+
+// ===============================
+// AIMBOT ENGINE
+// ===============================
+
+class AimbotCon {
+
+constructor(){
+
+this.lastAngle=0;
+
+this.targetPlayer=null;
+
+}
+
+
+wannaFire(target=this.targetPlayer){
+
+if(!target)return false;
+
+return(
+
+(target.x-target.prevX[0]>0)!=
+
+(target.prevX[0]-target.prevX[1]>0)
+
+);
+
+}
+
+
+resolve(){
+
+if(!World?.PLAYER)return 0;
+
+
+const myPlayer=
+
+GetAllTargets.getPlayerById(World.PLAYER.id);
+
+
+let target;
+
+
+if(MOD.LockId>-1){
+
+target=
+
+GetAllTargets.getPlayerById(MOD.LockId);
+
+}else{
+
+target=MOD.MouseFovEnable
+
+?this.findNearestPlayerTo(
+
+GetAllTargets.mouseMapCords,
+
+MOD.MouseFov
+
+)
+
+:this.findNearestPlayerTo(
+
+myPlayer,
+
+2500
+
+);
+
+}
+
+
+this.targetPlayer=target;
+
+
+if(!target)return 90;
+
+
+const weaponSlot=MOD.weaponSlot||1;
+
+
+const weaponId=
+
+World.PLAYER.inventory[weaponSlot-1][0];
+
+
+const weapon=
+
+ENTITIES[__ENTITIE_PLAYER__]
+
+.weapons[INVENTORY[weaponId].idWeapon];
+
+
+const vx=
+
+target.x-target.prevX[0];
+
+
+const vy=
+
+target.y-target.prevY[0];
+
+
+const bulletSpeed=
+
+weapon?.bulletSpeed
+
+?weapon.bulletSpeed*
+
+MOD.BulletSpeedCoefficient
+
+:250;
+
+
+const distance=
+
+Math.hypot(
+
+myPlayer.x-target.x,
+
+myPlayer.y-target.y
+
+)
+
+*MOD.DistanceCoefficient;
+
+
+const travelTime=
+
+distance/bulletSpeed;
+
+
+const futureX=
+
+target.x+vx*travelTime;
+
+
+const futureY=
+
+target.y+vy*travelTime;
+
+
+const angle=
+
+Math.atan2(
+
+futureY-myPlayer.y,
+
+futureX-myPlayer.x
+
+)
+
+*(180/Math.PI);
+
+
+this.lastAngle=angle;
+
+
+return Math.round(angle);
+
+}
+
+
+findNearestPlayerTo(cords,fov){
+
+let best=null;
+
+let min=fov;
+
+
+for(let id=1;id<121;id++){
+
+let p=
+
+GetAllTargets.getPlayerById(id);
+
+if(!p.active)continue;
+
+
+let dist=
+
+Math.hypot(
+
+cords.x-p.x,
+
+cords.y-p.y
+
+);
+
+
+if(dist<min){
+
+best=p;
+
+min=dist;
+
+}
+
+}
+
+
+return best;
+
+}
+
+}
+
+
+window.Aimbot=new AimbotCon();
+
+
+// ===============================
+// JITTER ENGINE
+// ===============================
+
+class JitterCon {
+
+constructor(){
+
+this.toggle=false;
+
+}
+
+
+getJitterAngle(){
+
+this.toggle=!this.toggle;
+
+return this.toggle
+
+?Aimbot.resolve()+MOD.JitterOffset
+
+:Aimbot.resolve()-MOD.JitterOffset;
+
+}
+
+}
+
+
+window.Jitter=new JitterCon();
+
+
+// ===============================
+// AIM LOOP
+// ===============================
+
+function AimbotRefresh(){
+
+if(!MOD.AimBotEnable)return;
+
+
+if(MOD.JitterActive){
+
+SendWSmsg([6,Jitter.getJitterAngle()]);
+
+}else{
+
+SendWSmsg([6,Aimbot.resolve()]);
+
+
+if(
+
+MOD.AutoFire&&
+
+Aimbot.wannaFire()
+
+){
+
+SendWSmsg([4]);
+
+SendWSmsg([5]);
+
+}
+
+}
+
+}
+
+
+setInterval(AimbotRefresh,40);
+
+
+// ===============================
+// KEYBINDS
+// ===============================
+
+window.addEventListener("keydown",e=>{
+
+if(e.code===MOD.AimbotKey)
+
+MOD.AimBotEnable=!MOD.AimBotEnable;
+
+
+if(e.code===MOD.JitterActiveKey)
+
+MOD.JitterActive=!MOD.JitterActive;
+
+});
+
+
+// ===============================
+// NEON MENU UI
+// ===============================
+
+(function(){
+
+const style=document.createElement("style");
+
+style.innerHTML=`
 
 #devastMenu{
 position:fixed;
@@ -22,463 +476,75 @@ box-shadow:0 0 30px #8a2cff;
 z-index:999999;
 }
 
-#devastHeader{
-text-align:center;
-font-size:24px;
-padding:16px;
-border-bottom:1px solid #8a2cff;
-text-shadow:0 0 14px #8a2cff;
-}
-
-.menuItem{
-padding:14px 18px;
-border-bottom:1px solid rgba(138,44,255,.25);
-cursor:pointer;
-font-size:16px;
-}
-
-.subMenu{
-display:none;
-padding:12px 22px;
-background:rgba(138,44,255,.08);
-}
-
-.subMenu label{
-display:flex;
-justify-content:space-between;
-margin:8px 0;
-font-size:14px;
-}
-
-input[type=range]{
-width:140px;
-accent-color:#8a2cff;
-}
-
-input[type=text]{
-background:black;
-border:1px solid #8a2cff;
-color:white;
-width:120px;
-}
-
-select{
-background:black;
-border:1px solid #8a2cff;
-color:white;
-appearance:none;
-padding:4px 8px;
-border-radius:6px;
-}
-
-.arrow{
-margin-right:10px;
-color:#a56cff;
-}
 `;
 
 document.head.appendChild(style);
 
 
-/*
-CONFIG
-*/
-
-const MOD = {
-
-VisualizeResolving:false,
-VisualizeResolvingColor:"#eeeeee",
-ResolverType:"linear",
-DistanceCoefficient:270,
-BulletSpeedCoefficient:1.75,
-OffsetCoefficient:0.1,
-MouseFov:3000,
-AutoFire:false,
-LockId:-1,
-
-JitterActive:false,
-JitterOffset:50,
-
-ShowHP:true,
-ShowPing:true,
-PlayerTracers:false,
-Scale:-0.53,
-linesOpacity:1,
-
-TeamColor:"#00ffff",
-EnemyColor:"#ff0000",
-
-AimbotKey:"KeyZ",
-AutoLootKey:"NoKey",
-FAutoLootKey:"KeyX",
-AutoBuildKey:"KeyB",
-AutoRunKey:"KeyShift",
-JitterActiveKey:"KeyJ",
-PlayerListKey:"KeyL",
-
-AutoCookFood:false,
-AutoAlloys:false,
-AutoUranium:false,
-AutoGasoline:false,
-AutoInventory:false,
-AutoRun:false,
-AutoRespawn:false,
-AutoHit:false,
-AntiKick:true,
-AutoAcceptAndKick:false,
-AutoBuild:false,
-AutoWood:false,
-AutoSwitchEnable:false,
-FAutoLoot:false,
-AutoLoot:false,
-AutoFeed:false,
-HungryLevel:75,
-
-Token:""
-
-};
-
-
-/*
-UI FACTORIES
-*/
-
 function checkbox(name){
 
-const wrap=document.createElement("label");
+const label=document.createElement("label");
 
-wrap.innerHTML=`${name}<input type="checkbox">`;
+label.innerHTML=
 
-const input=wrap.querySelector("input");
+name+
+
+'<input type="checkbox">';
+
+
+const input=
+
+label.querySelector("input");
+
 
 input.checked=MOD[name];
 
-input.onchange=e=>MOD[name]=e.target.checked;
 
-return wrap;
+input.onchange=
 
-}
+e=>MOD[name]=e.target.checked;
 
 
-function slider(name,min,max){
-
-const wrap=document.createElement("label");
-
-const step = Number.isInteger(MOD[name]) ? 1 : 0.1;
-
-wrap.innerHTML=`
-${name}
-<input type="range" min="${min}" max="${max}" step="${step}">
-`;
-
-const input=wrap.querySelector("input");
-
-input.value=MOD[name];
-
-input.oninput=e=>MOD[name]=parseFloat(e.target.value);
-
-return wrap;
+return label;
 
 }
 
 
-function dropdown(name,list){
+const menu=
 
-const wrap=document.createElement("label");
+document.createElement("div");
 
-const select=document.createElement("select");
-
-list.forEach(v=>{
-
-const opt=document.createElement("option");
-
-opt.textContent=v;
-
-select.appendChild(opt);
-
-});
-
-select.value=MOD[name];
-
-select.onchange=e=>MOD[name]=e.target.value;
-
-wrap.append(name,select);
-
-return wrap;
-
-}
-
-
-function color(name,value){
-
-const wrap=document.createElement("label");
-
-const input=document.createElement("input");
-
-input.type="color";
-
-input.value=value;
-
-input.onchange=e=>MOD[name]=e.target.value;
-
-wrap.append(name,input);
-
-return wrap;
-
-}
-
-
-function textKey(name){
-
-const wrap=document.createElement("label");
-
-const input=document.createElement("input");
-
-input.type="text";
-
-input.value=MOD[name];
-
-input.onchange=e=>MOD[name]=e.target.value;
-
-wrap.append(name,input);
-
-return wrap;
-
-}
-
-
-function textInput(name){
-
-const wrap=document.createElement("label");
-
-const input=document.createElement("input");
-
-input.type="text";
-
-input.value=MOD[name];
-
-input.onchange=e=>MOD[name]=e.target.value;
-
-wrap.append(name,input);
-
-return wrap;
-
-}
-
-
-function button(label){
-
-const btn=document.createElement("button");
-
-btn.textContent=label;
-
-btn.style.margin="6px 0";
-btn.style.background="#120022";
-btn.style.color="#cfa6ff";
-btn.style.border="1px solid #8a2cff";
-
-btn.onclick=()=>{
-
-if(label==="Save Settings"){
-
-localStorage.setItem("CHOZA_CONFIG",JSON.stringify(MOD));
-alert("Config saved");
-
-}
-
-if(label==="Copy Token"){
-
-navigator.clipboard.writeText(localStorage.getItem("token"));
-
-}
-
-if(label==="Change Token"){
-
-localStorage.setItem("token",MOD.Token);
-location.reload();
-
-}
-
-};
-
-return btn;
-
-}
-
-
-/*
-MENU STRUCTURE
-*/
-
-const modules={
-
-AIMBOT:[
-
-checkbox("VisualizeResolving"),
-color("VisualizeResolvingColor","#eeeeee"),
-dropdown("ResolverType",["linear","predict","advanced"]),
-slider("DistanceCoefficient",0,500),
-slider("BulletSpeedCoefficient",0,5),
-slider("OffsetCoefficient",0,1),
-slider("MouseFov",0,5000),
-checkbox("AutoFire"),
-slider("LockId",-10,10)
-
-],
-
-ANTIAIM:[
-
-checkbox("JitterActive"),
-slider("JitterOffset",0,200)
-
-],
-
-VISUALS:[
-
-checkbox("ShowHP"),
-checkbox("ShowPing"),
-checkbox("PlayerTracers"),
-slider("Scale",-1,1),
-slider("linesOpacity",0,2)
-
-],
-
-COLORS:[
-
-color("TeamColor","#00ffff"),
-color("EnemyColor","#ff0000")
-
-],
-
-BINDS:[
-
-textKey("AimbotKey"),
-textKey("AutoLootKey"),
-textKey("FAutoLootKey"),
-textKey("AutoBuildKey"),
-textKey("AutoRunKey"),
-textKey("JitterActiveKey"),
-textKey("PlayerListKey")
-
-],
-
-AUTOMATION:[
-
-checkbox("AutoCookFood"),
-checkbox("AutoAlloys"),
-checkbox("AutoUranium"),
-checkbox("AutoGasoline"),
-checkbox("AutoInventory"),
-checkbox("AutoRun"),
-checkbox("AutoRespawn"),
-checkbox("AutoHit"),
-checkbox("AntiKick"),
-checkbox("AutoAcceptAndKick"),
-checkbox("AutoBuild"),
-checkbox("AutoWood"),
-checkbox("AutoSwitchEnable"),
-checkbox("FAutoLoot"),
-checkbox("AutoLoot"),
-checkbox("AutoFeed"),
-slider("HungryLevel",0,100)
-
-],
-
-TOKENCHANGER:[
-
-button("Copy Token"),
-textInput("Token"),
-button("Change Token")
-
-],
-
-CFG:[
-
-button("Save Settings")
-
-]
-
-};
-
-
-/*
-MENU BUILD
-*/
-
-const menu=document.createElement("div");
 
 menu.id="devastMenu";
 
-menu.innerHTML=`<div id="devastHeader">CHOZAHUINYA</div>`;
+
+menu.innerHTML=
+
+'<div style="padding:10px">CHOZAHUINYA</div>';
 
 
-Object.entries(modules).forEach(([section,items])=>{
+menu.appendChild(
 
-const item=document.createElement("div");
+checkbox("AimBotEnable")
 
-item.className="menuItem";
+);
 
-item.innerHTML=`<span class="arrow">▶</span>${section}`;
 
-const sub=document.createElement("div");
+menu.appendChild(
 
-sub.className="subMenu";
+checkbox("AutoFire")
 
-items.forEach(el=>sub.appendChild(el));
+);
 
-item.onclick=()=>{
 
-sub.style.display=sub.style.display==="block"?"none":"block";
+menu.appendChild(
 
-item.querySelector(".arrow").textContent=
+checkbox("JitterActive")
 
-sub.style.display==="block"?"▼":"▶";
-
-};
-
-menu.appendChild(item);
-
-menu.appendChild(sub);
-
-});
+);
 
 
 document.body.appendChild(menu);
 
-
-/*
-DRAG SYSTEM
-*/
-
-let drag=false;
-
-let offsetX=0;
-
-let offsetY=0;
-
-
-menu.addEventListener("mousedown",e=>{
-
-drag=true;
-
-offsetX=e.clientX-menu.offsetLeft;
-
-offsetY=e.clientY-menu.offsetTop;
-
-});
-
-
-document.addEventListener("mouseup",()=>drag=false);
-
-
-document.addEventListener("mousemove",e=>{
-
-if(!drag)return;
-
-menu.style.left=(e.clientX-offsetX)+"px";
-
-menu.style.top=(e.clientY-offsetY)+"px";
-
-});
 
 })();
