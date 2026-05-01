@@ -54,40 +54,17 @@ this.EnemyColor="#ff0000";
 // KEYBINDS
 
 this.AimbotKey="KeyZ";
-this.AutoLootKey="NoKey";
-this.FAutoLootKey="KeyX";
-this.AutoBuildKey="KeyB";
-this.AutoRunKey="KeyShift";
 this.JitterActiveKey="KeyJ";
-this.PlayerListKey="KeyL";
 
 
 // AUTOMATION
 
-this.AutoCookFood=false;
-this.AutoAlloys=false;
-this.AutoUranium=false;
-this.AutoGasoline=false;
-this.AutoInventory=false;
-
 this.AutoRun=false;
 this.AutoRespawn=false;
-this.AutoHit=false;
-
-this.AntiKick=true;
-
-this.AutoAcceptAndKick=false;
 this.AutoBuild=false;
-this.AutoWood=false;
-this.AutoSwitchEnable=false;
-
-this.FAutoLoot=false;
-this.AutoLoot=false;
 this.AutoFeed=false;
 
 this.HungryLevel=75;
-
-this.Token="";
 
 }
 
@@ -150,11 +127,6 @@ this.players[i]=new Resolve(i);
 
 this.mouseMapCords={x:0,y:0};
 
-this.lines=[{
-reset(){},
-color:"#eeeeee"
-}];
-
 }
 
 getPlayerById(id){
@@ -166,6 +138,44 @@ return this.players[id];
 }
 
 window.GetAllTargets=new GetAllTargetsCon();
+
+
+// ===============================
+// PLAYER TRACKER
+// ===============================
+
+setInterval(()=>{
+
+if(typeof World==="undefined") return;
+if(!World.players) return;
+
+for(let id in World.players){
+
+const p=World.players[id];
+
+if(!p) continue;
+
+const tracker=GetAllTargets.getPlayerById(p.id);
+
+if(!tracker) continue;
+
+tracker.update(p.x,p.y);
+
+}
+
+},40);
+
+
+// ===============================
+// MOUSE TRACKER
+// ===============================
+
+window.addEventListener("mousemove",e=>{
+
+GetAllTargets.mouseMapCords.x=e.clientX;
+GetAllTargets.mouseMapCords.y=e.clientY;
+
+});
 
 
 // ===============================
@@ -206,7 +216,6 @@ GetAllTargets.getPlayerById(World.PLAYER.id);
 
 
 let target;
-
 
 if(MOD.LockId>-1){
 
@@ -298,7 +307,6 @@ findNearestPlayerTo(cords,fov){
 let best=null;
 let min=fov;
 
-
 for(let id=1;id<121;id++){
 
 let p=
@@ -306,13 +314,11 @@ GetAllTargets.getPlayerById(id);
 
 if(!p.active)continue;
 
-
 let dist=
 Math.hypot(
 cords.x-p.x,
 cords.y-p.y
 );
-
 
 if(dist<min){
 
@@ -360,7 +366,7 @@ window.Jitter=new JitterCon();
 
 
 // ===============================
-// AIM LOOP SAFE START
+// AIM LOOP
 // ===============================
 
 function AimbotRefresh(){
@@ -379,7 +385,6 @@ SendWSmsg([6,Jitter.getJitterAngle()]);
 
 SendWSmsg([6,Aimbot.resolve()]);
 
-
 if(
 MOD.AutoFire &&
 Aimbot.wannaFire()
@@ -394,7 +399,6 @@ SendWSmsg([5]);
 
 }
 
-
 setInterval(AimbotRefresh,40);
 
 
@@ -407,7 +411,6 @@ window.addEventListener("keydown",e=>{
 if(e.code===MOD.AimbotKey)
 MOD.AimBotEnable=!MOD.AimBotEnable;
 
-
 if(e.code===MOD.JitterActiveKey)
 MOD.JitterActive=!MOD.JitterActive;
 
@@ -415,187 +418,33 @@ MOD.JitterActive=!MOD.JitterActive;
 
 
 // ===============================
-// SIMPLE NEON MENU (TEST PANEL)
+// SIMPLE MENU UI
 // ===============================
 
 (function(){
-
-const style=document.createElement("style");
-
-style.innerHTML=`
-
-#devastMenu{
-position:fixed;
-top:120px;
-left:120px;
-width:260px;
-background:black;
-border:2px solid #8a2cff;
-border-radius:14px;
-color:#d7b8ff;
-padding:10px;
-font-family:Orbitron;
-box-shadow:0 0 25px #8a2cff;
-z-index:999999;
-}
-
-label{
-display:block;
-margin:8px 0;
-}
-
-`;
-
-document.head.appendChild(style);
-
-
-function checkbox(name){
-
-const label=document.createElement("label");
-
-label.innerHTML=
-name+' <input type="checkbox">';
-
-const input=label.querySelector("input");
-
-input.checked=MOD[name];
-
-input.onchange=e=>MOD[name]=e.target.checked;
-
-return label;
-
-}
-function slider(name,min,max){
-
-const label=document.createElement("label");
-
-label.innerHTML=
-
-name+' <input type="range" min="'+min+'" max="'+max+'" step="0.1">';
-
-const input=label.querySelector("input");
-
-input.value=MOD[name];
-
-input.oninput=e=>MOD[name]=parseFloat(e.target.value);
-
-return label;
-
-}
-
-
-function section(title,elements){
-
-const wrapper=document.createElement("div");
-
-wrapper.style.marginBottom="10px";
-
-const header=document.createElement("div");
-
-header.textContent="▶ "+title;
-
-header.style.cursor="pointer";
-
-header.style.marginTop="6px";
-
-header.style.fontWeight="bold";
-
-const body=document.createElement("div");
-
-body.style.display="none";
-
-elements.forEach(el=>body.appendChild(el));
-
-header.onclick=()=>{
-
-body.style.display=
-
-body.style.display==="none"
-
-?"block"
-
-:"none";
-
-};
-
-wrapper.appendChild(header);
-
-wrapper.appendChild(body);
-
-return wrapper;
-
-}
 
 const menu=document.createElement("div");
 
 menu.id="devastMenu";
 
-menu.innerHTML="<b>CHOZAHUINYA</b>";
+menu.style.position="fixed";
+menu.style.left="120px";
+menu.style.top="120px";
+menu.style.background="black";
+menu.style.padding="10px";
+menu.style.border="2px solid #8a2cff";
+menu.style.borderRadius="14px";
+menu.style.color="#d7b8ff";
+menu.style.zIndex="999999";
 
-menu.appendChild(section("AIMBOT",[
-checkbox("AimBotEnable"),
-checkbox("AutoFire"),
-checkbox("VisualizeResolving"),
-slider("MouseFov",0,5000),
-slider("DistanceCoefficient",0,500),
-slider("BulletSpeedCoefficient",0,5),
-slider("OffsetCoefficient",0,1),
-slider("LockId",-1,120)
-]));
+menu.innerHTML=`
+<b>CHOZAHUINYA</b><br><br>
 
-menu.appendChild(section("ANTIAIM",[
-checkbox("JitterActive"),
-slider("JitterOffset",0,200)
-]));
+AimBotEnable <input type="checkbox"><br>
+AutoFire <input type="checkbox"><br>
+JitterActive <input type="checkbox">
+`;
 
-menu.appendChild(section("VISUALS",[
-checkbox("ShowHP"),
-checkbox("ShowPing"),
-checkbox("PlayerTracers"),
-slider("linesOpacity",0,2)
-]));
-
-menu.appendChild(section("AUTOMATION",[
-checkbox("AutoRun"),
-checkbox("AutoRespawn"),
-checkbox("AutoBuild"),
-checkbox("AutoFeed"),
-slider("HungryLevel",0,100)
-]));
 document.body.appendChild(menu);
-
-// ===============================
-// MENU DRAG SYSTEM
-// ===============================
-
-(function(){
-
-const menuDrag=document.getElementById("devastMenu");
-
-if(!menuDrag)return;
-
-let drag=false;
-let offsetX=0;
-let offsetY=0;
-
-menuDrag.addEventListener("mousedown",e=>{
-
-drag=true;
-
-offsetX=e.clientX-menuDrag.offsetLeft;
-offsetY=e.clientY-menuDrag.offsetTop;
-
-});
-
-document.addEventListener("mouseup",()=>drag=false);
-
-document.addEventListener("mousemove",e=>{
-
-if(!drag)return;
-
-menuDrag.style.left=(e.clientX-offsetX)+"px";
-menuDrag.style.top=(e.clientY-offsetY)+"px";
-
-});
 
 })();
