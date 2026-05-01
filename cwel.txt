@@ -1,18 +1,3 @@
-/*
-owner discord = 8nx
-
-for chat
-!copy=id stoling people name
-!players = showing how much people on the server
-!pos = showing your location like X: Y:
-!r-t = changeing your old token to new one
-
-for bots
-direction 0 = bots no move
-direction 1 = bots go a1
-direction 2 = bots go a8
-direction 3 = bots go h1
-direction 4 = bots go h8
 
 */
 var lastMessageTime;
@@ -686,7 +671,7 @@ window.addEventListener("mousemove", event => {
 });
 
 
-window.onload = async () => {
+window.addEventListener("load", async () => {
     await loadScript('https://cdn.jsdelivr.net/npm/guify@0.12.0/lib/guify.min.js');
     if (localStorage.getItem("ElmasModMenu2Config") === null) {
     localStorage.setItem("ElmasModMenu2Config", JSON.stringify(MOD));
