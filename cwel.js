@@ -1,4 +1,3 @@
-/
 var lastMessageTime;
 
 class TickAnalyzer {
