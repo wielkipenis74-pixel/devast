@@ -745,7 +745,6 @@ root: document.body,
 open: true,
 
 pollRateMS: 10
-});
 
 });
 
