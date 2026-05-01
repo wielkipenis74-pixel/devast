@@ -698,34 +698,54 @@ window.onload = async () => {
     }
 }
 const gui = new guify({
-title: "PPAWARE",
+title: "BUZKAWARE",
+
 theme: {
-    name: "Dope Internal Theme",
-    colors: {
-        menuBarBackground: "rgb(0, 0, 0)",
-        menuBarText: "rgba(0, 0, 0, 0.9)",
-        panelBackground: "rgba(0, 0, 0, 0.9)",
-        componentBackground: "rgb(26, 26, 26)",
-        componentForeground: "rgb(255, 255, 255)",
-        textPrimary: "rgb(255, 255, 255)",
-        textSecondary: "rgb(255, 255, 255)",
-        textHover: "rgb(0, 10, 30)",
-    },
-    font: {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        fontWeight: 'bold'
-    },
+name: "Purple Neon Theme",
+
+colors: {
+
+menuBarBackground: "rgb(20, 0, 40)",
+
+menuBarText: "rgb(200, 160, 255)",
+
+panelBackground: "rgba(15, 0, 35, 0.95)",
+
+componentBackground: "rgb(35, 0, 70)",
+
+componentForeground: "rgb(220, 180, 255)",
+
+textPrimary: "rgb(240, 200, 255)",
+
+textSecondary: "rgb(180, 140, 255)",
+
+textHover: "rgb(255, 210, 255)"
+
 },
+
+font: {
+fontFamily: "Arial",
+fontSize: "13px",
+fontWeight: "bold"
+}
+
+},
+
 align: "right",
 width: 400,
-height: 'auto',
+height: "auto",
+
 barMode: "none",
 panelMode: "scroll",
+
 opacity: 90,
-root: window.container,
+
+root: document.body,
+
 open: true,
-pollRateMS: 10,
+
+pollRateMS: 10
+});
 
 });
 
