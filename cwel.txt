@@ -698,7 +698,7 @@ window.onload = async () => {
     }
 }
 const gui = new guify({
-title: "chozahuinya",
+title: "PPAWARE",
 theme: {
     name: "Dope Internal Theme",
     colors: {
