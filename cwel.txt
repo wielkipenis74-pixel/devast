@@ -465,7 +465,66 @@ input.onchange=e=>MOD[name]=e.target.checked;
 return label;
 
 }
+function slider(name,min,max){
 
+const label=document.createElement("label");
+
+label.innerHTML=
+
+name+' <input type="range" min="'+min+'" max="'+max+'" step="0.1">';
+
+const input=label.querySelector("input");
+
+input.value=MOD[name];
+
+input.oninput=e=>MOD[name]=parseFloat(e.target.value);
+
+return label;
+
+}
+
+
+function section(title,elements){
+
+const wrapper=document.createElement("div");
+
+wrapper.style.marginBottom="10px";
+
+const header=document.createElement("div");
+
+header.textContent="▶ "+title;
+
+header.style.cursor="pointer";
+
+header.style.marginTop="6px";
+
+header.style.fontWeight="bold";
+
+const body=document.createElement("div");
+
+body.style.display="none";
+
+elements.forEach(el=>body.appendChild(el));
+
+header.onclick=()=>{
+
+body.style.display=
+
+body.style.display==="none"
+
+?"block"
+
+:"none";
+
+};
+
+wrapper.appendChild(header);
+
+wrapper.appendChild(body);
+
+return wrapper;
+
+}
 
 const menu=document.createElement("div");
 
@@ -473,10 +532,70 @@ menu.id="devastMenu";
 
 menu.innerHTML="<b>CHOZAHUINYA</b>";
 
-menu.appendChild(checkbox("AimBotEnable"));
-menu.appendChild(checkbox("AutoFire"));
-menu.appendChild(checkbox("JitterActive"));
+menu.appendChild(section("AIMBOT",[
+checkbox("AimBotEnable"),
+checkbox("AutoFire"),
+checkbox("VisualizeResolving"),
+slider("MouseFov",0,5000),
+slider("DistanceCoefficient",0,500),
+slider("BulletSpeedCoefficient",0,5),
+slider("OffsetCoefficient",0,1),
+slider("LockId",-1,120)
+]));
 
+menu.appendChild(section("ANTIAIM",[
+checkbox("JitterActive"),
+slider("JitterOffset",0,200)
+]));
+
+menu.appendChild(section("VISUALS",[
+checkbox("ShowHP"),
+checkbox("ShowPing"),
+checkbox("PlayerTracers"),
+slider("linesOpacity",0,2)
+]));
+
+menu.appendChild(section("AUTOMATION",[
+checkbox("AutoRun"),
+checkbox("AutoRespawn"),
+checkbox("AutoBuild"),
+checkbox("AutoFeed"),
+slider("HungryLevel",0,100)
+]));
 document.body.appendChild(menu);
+
+// ===============================
+// MENU DRAG SYSTEM
+// ===============================
+
+(function(){
+
+const menu=document.getElementById("devastMenu");
+
+if(!menu)return;
+
+let drag=false;
+let offsetX=0;
+let offsetY=0;
+
+menu.addEventListener("mousedown",e=>{
+
+drag=true;
+
+offsetX=e.clientX-menu.offsetLeft;
+offsetY=e.clientY-menu.offsetTop;
+
+});
+
+document.addEventListener("mouseup",()=>drag=false);
+
+document.addEventListener("mousemove",e=>{
+
+if(!drag)return;
+
+menu.style.left=(e.clientX-offsetX)+"px";
+menu.style.top=(e.clientY-offsetY)+"px";
+
+});
 
 })();
