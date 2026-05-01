@@ -570,20 +570,20 @@ document.body.appendChild(menu);
 
 (function(){
 
-const menu=document.getElementById("devastMenu");
+const menuDrag=document.getElementById("devastMenu");
 
-if(!menu)return;
+if(!menuDrag)return;
 
 let drag=false;
 let offsetX=0;
 let offsetY=0;
 
-menu.addEventListener("mousedown",e=>{
+menuDrag.addEventListener("mousedown",e=>{
 
 drag=true;
 
-offsetX=e.clientX-menu.offsetLeft;
-offsetY=e.clientY-menu.offsetTop;
+offsetX=e.clientX-menuDrag.offsetLeft;
+offsetY=e.clientY-menuDrag.offsetTop;
 
 });
 
@@ -593,8 +593,8 @@ document.addEventListener("mousemove",e=>{
 
 if(!drag)return;
 
-menu.style.left=(e.clientX-offsetX)+"px";
-menu.style.top=(e.clientY-offsetY)+"px";
+menuDrag.style.left=(e.clientX-offsetX)+"px";
+menuDrag.style.top=(e.clientY-offsetY)+"px";
 
 });
 
